@@ -14,9 +14,8 @@ laser.
 """
 class Camera():
 
+    # Initialize SDK and Camera objects in order to use ThorLabs API functions
     def __init__(self, camSesh, cam):
-
-        # Create instance of SDK in order to construct a camera
         self.camSesh = TLCameraSDK()
         camList = camSesh.discover_available_cameras()
         self.cam = camSesh.open_camera('08153')
