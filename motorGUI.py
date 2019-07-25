@@ -86,6 +86,15 @@ class motorGUI:
             print("zTurn selected")
         self.z_button_r = Button(master, command=zTurn, text="Move motors")
 
+        # Create picture and auto-align buttons
+        def snapPic():
+            print("Snap pic")
+        self.takePic = Button(master, command=snapPic, text="Take Picture")
+
+        def align():
+            print("auto-align")
+        self.autoAlign = Button(master, command=align, text="Auto-Align")
+
 
 
         # Organize buttons on screen
@@ -124,7 +133,10 @@ class motorGUI:
         self.z_turn1.grid(column=40, row=22)
         self.z_turn2.grid(column=48, row=22)
         self.z_button_r.grid(column=40, row=23)
-        
+
+        # Organize take picture and auto-align buttons
+        self.takePic.grid(column=0, row=40)
+        self.autoAlign.grid(column=20, row = 40)
     
 root = Tk()
 my_gui = motorGUI(root)
