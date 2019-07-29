@@ -1,93 +1,208 @@
-import serial
-import os
-import ctypes
+import usb.core
+import usb.util
+import re
+
+NEWFOCUS_COMMAND_REGEX = re.compile("([0-9]{0,1})([a-zA-Z?]{2,})([0-9+-]*)")
+MOTOR_TYPE = {
+        "0":"No motor connected",
+        "1":"Motor Unknown",
+        "2":"'Tiny' Motor",
+        "3":"'Standard' Motor"
+        }
+
 
 """
 MotorController
-
 This class is used to control a rig containing five picomotors which can be used to adjust five different
 degrees of freedom of movement for the gratings. This class uses the axis convention usually applied in optics
 of making the z axis the direction in which the x-rays pass through the gratings. Thus, the X axis controls
 side to side movement of the grating.
-
 """
 
-motdll = ctypes.CDLL("./usbdll.dll")
-print(motdll)
-result = motdll.newp_usb_open_devices(4000, True)
-result2 = motdll.newp_usb_init_system()
-print(result)
-print(result2)
 
 
-
-"""
 class MotorController():
-
     
     # Establish serial connection with motors and setup controller
-    def __init__():
-        # Load dll to use USB driver API
-        motdll = windll.LoadLibrary("C:\\usbdll.dll")
-        # Open all picomotor controllers using the product ID(4000)
+    def __init__(self):
+        vid = 0x104d
+        pid = 0x4000
+        self.dev = usb.core.find(idProduct=pid, idVendor=vid)
+        print(self.dev)
 
-        open_motors = motdll.newp_usb_open_devices(4000, False)
-        open_momtors.argtypes = (ctypes.c_int, ctypes.c_bool, ctypes.POINTER(ctypes.int))
-        # After all devices have been opened and Device Keys are known,
-        # initialize the system to be ready for serial commands.
-        initMotor = motdll.lib.newp_usb_init_system(0, address of device state changed function)
-        initMotor.argtypes = (ctypes.c_init, ctypes.POINTER(c_void))
+        # set the active configuration. With no arguments, the first
+        # configuration will be the active one
+        self.dev.set_configuration()
+
+        # get an endpoint instance
+        cfg = self.dev.get_active_configuration()
+        intf = cfg[(0,0)]
+
+        self.ep_out = usb.util.find_descriptor(
+            intf,
+            # match the first OUT endpoint
+            custom_match = \
+            lambda e: \
+                usb.util.endpoint_direction(e.bEndpointAddress) == \
+                usb.util.ENDPOINT_OUT)
+
+        self.ep_in = usb.util.find_descriptor(
+            intf,
+            # match the first IN endpoint
+            custom_match = \
+            lambda e: \
+                usb.util.endpoint_direction(e.bEndpointAddress) == \
+                usb.util.ENDPOINT_IN)
+
+        assert (self.ep_out and self.ep_in) is not None
+        """
+        # Confirm connection to user
+        resp = self.command('VE?')
+        print("Connected to Motor Controller Model {}. Firmware {} {} {}\n".format(
+                                                    *resp.split(' ')
+                                                    ))
+        for m in range(1,5):
+            resp = self.command("{}QM?".format(m))
+            print("Motor #{motor_number}: {status}".format(
+                                                    motor_number=m,
+                                                    status=MOTOR_TYPE[resp[-1]]
+                                                    ))
+        """                  
         
         
+    def send_command(self, usb_command, get_reply=False):
+        """Send command to USB device endpoint
+        
+        Args:
+            usb_command (str): Correctly formated command for USB driver
+            get_reply (bool): query the IN endpoint after sending command, to 
+                get controller's reply
+        Returns:
+            Character representation of returned hex values if a reply is 
+                requested
+        """
+        self.ep_out.write(usb_command)
+        if get_reply:
+            return self.ep_in.read(100)
+            
+
+    def parse_command(self, newfocus_command):
+        """Convert a NewFocus style command into a USB command
+        Args:
+            newfocus_command (str): of the form xxAAnn
+                > The general format of a command is a two character mnemonic (AA). 
+                Both upper and lower case are accepted. Depending on the command, 
+                it could also have optional or required preceding (xx) and/or 
+                following (nn) parameters.
+                cite [2 - 6.1.2]
+        """
+        m = NEWFOCUS_COMMAND_REGEX.match(newfocus_command)
+
+        # Check to see if a regex match was found in the user submitted command
+        if m:
+
+            # Extract matched components of the command
+            driver_number, command, parameter = m.groups()
+
+
+            usb_command = command
+
+            # Construct USB safe command
+            if driver_number:
+                usb_command = '1>{driver_number} {command}'.format(
+                                                    driver_number=driver_number,
+                                                    command=usb_command
+                                                    )
+            if parameter:
+                usb_command = '{command} {parameter}'.format(
+                                                    command=usb_command,
+                                                    parameter=parameter
+                                                    )
+
+            usb_command += '\r'
+
+            return usb_command
+        else:
+            print("ERROR! Command {} was not a valid format".format(
+                                                            newfocus_command
+                                                            ))
+
+
+    def parse_reply(self, reply):
+        """Take controller's reply and make human readable
+        Args:
+            reply (list): list of bytes returns from controller in hex format
+        Returns:
+            reply (str): Cleaned string of controller reply
+        """
+
+        # convert hex to characters 
+        reply = ''.join([chr(x) for x in reply])
+        return reply.rstrip()
+
+
+    def command(self, newfocus_command):
+        """Send NewFocus formated command
+        Args:
+            newfocus_command (str): Legal command listed in usermanual [2 - 6.2] 
+        Returns:
+            reply (str): Human readable reply from controller
+        """
+        usb_command = self.parse_command(newfocus_command)
+
+        # if there is a '?' in the command, the user expects a response from
+        # the driver
+        if '?' in newfocus_command:
+            get_reply = True
+        else:
+            get_reply = False
+
+        reply = self.send_command(usb_command, get_reply)
+
+        # if a reply is expected, parse it
+        if get_reply:
+            return self.parse_reply(reply)
+
+
+
     # Close serial connection with the MotorController when finished
     def closeMotorController():
-        motdll.newp_usb_uninit_system()
         
-
+        
     # Used to translationally move grating in X-axis relative to current position
     def moveX(direction, distance):
-        # Using the distance and the direction, create proper ascii command
-        
-        # Send usb serial command to translation motor in X-axis
-        send_command = motdll.newp_usb_send_ascii(deviceID, command, strlen(command))
-        send_command.argtypes = (ctypes.c_long, ctypes.POINTER(ctypes.c_char), ctypes.c_ulong)
+
 
     # Used to translationally move grating in Z-axis relative to current position
     def moveZ(direction, distance):
         # Using the distance and the direction, create proper ascii command
         
         # Send usb serial command to translation motor in Z-axis
-        send_command = motdll.newp_usb_send_ascii(deviceID, command, strlen(command))
-        send_command.argtypes = (ctypes.c_long, ctypes.POINTER(ctypes.c_char), ctypes.c_ulong)    
+    
         
     # Used to turn grating about X-axis relative to current orientation
     def turnX(direction, theta):
         # Using the direction and the desired angle of rotation, create proper
         # ascii command to send to controller
-
         # Send usb serial command to rotational motor in X-axis
-        send_command = motdll.newp_usb_send_ascii(deviceID, command, strlen(command))
-        send_command.argtypes = (ctypes.c_long, ctypes.POINTER(ctypes.c_char), ctypes.c_ulong)
+        
         
     # Used to turn grating about Y-axis relative to current orientation
     def turnY(direction, theta):
         # Using the direction and the desired angle of rotation, create proper
         # ascii command to send to controller
-
         # Send usb serial command to rotational motor in Y-axis
-        send_command = motdll.newp_usb_send_ascii(deviceID, command, strlen(command))
-        send_command.argtypes = (ctypes.c_long, ctypes.POINTER(ctypes.c_char), ctypes.c_ulong)
+     
         
     # Used to turn grating about Z-axis relative to current orientation
     def turnZ(direction, theta):
         # Using the direction and the desired angle of rotation, create proper
         # ascii command to send to controller
-
         # Send usb serial command to rotational motor in Z-axis
-        send_command = motdll.newp_usb_send_ascii(deviceID, command, strlen(command))
-        send_command.argtypes = (ctypes.c_long, ctypes.POINTER(ctypes.c_char), ctypes.c_ulong)
-        
+      
     # Used to autoalign gratings based on picture of the fiducial image
     def autoAllign():
+        print(0)
     
-"""
+controller = MotorController()
+    
