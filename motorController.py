@@ -56,18 +56,44 @@ class MotorController():
 
         assert (self.ep_out and self.ep_in) is not None
         """
+        
+        """
+
+        # Establish RS-485 Network Connection
+        # Serial command SC2 scans RS-485 network of master controller and assigns
+        # an address to controller 2
+        scanNetwork = self.command('SC2')
+
+        """
+        # Test to confirm that both master and slave controllers are connected
         # Confirm connection to user
         resp = self.command('VE?')
         print("Connected to Motor Controller Model {}. Firmware {} {} {}\n".format(
                                                     *resp.split(' ')
                                                     ))
-        for m in range(1,5):
+        numTranMotors = 2
+        numRotMotors = 3
+        # Translational Motors will be connected to master controller
+        # Rotational Motors will be connected to slave controller
+        # Slave controller commands must be prefixed with "2>"
+        
+        for m in range(1,numTranMotors):
             resp = self.command("{}QM?".format(m))
             print("Motor #{motor_number}: {status}".format(
                                                     motor_number=m,
                                                     status=MOTOR_TYPE[resp[-1]]
                                                     ))
-        """                  
+        for m in range(1,numRotMotors):
+            resp = self.command("2>{}QM?".format(m))
+            print("Motor #{motor_number}: {status}".format(
+                                                    motor_number=m,
+                                                    status=MOTOR_TYPE[resp[-1]]
+                                                    ))
+
+""      """
+        
+
+        
         
         
     def send_command(self, usb_command, get_reply=False):
@@ -163,45 +189,66 @@ class MotorController():
         if get_reply:
             return self.parse_reply(reply)
 
-
-
+    
     # Close serial connection with the MotorController when finished
     def closeMotorController():
+        print(0)
         
         
     # Used to translationally move grating in X-axis relative to current position
-    def moveX(direction, distance):
+    def moveX(self, direction, distance):
+        if (direction == 0):
+            distance = -distance
+        motorCommand = '1PR' + str(distance)
+        self.command(motorCommand)
+            
+
 
 
     # Used to translationally move grating in Z-axis relative to current position
-    def moveZ(direction, distance):
-        # Using the distance and the direction, create proper ascii command
-        
-        # Send usb serial command to translation motor in Z-axis
+    def moveZ(self, direction, distance):
+        if (direction == 0):
+            distance = -distance
+        motorCommand = '2PR' + str(distance)
+        self.command(motorCommand)
     
+
         
     # Used to turn grating about X-axis relative to current orientation
-    def turnX(direction, theta):
+    def turnX(self, direction, theta):
         # Using the direction and the desired angle of rotation, create proper
         # ascii command to send to controller
         # Send usb serial command to rotational motor in X-axis
+        if (direction == 0):
+            distance = -distance
+        motorCommand = '2>1PR' + str(distance)
+        self.command(motorCommand)
         
+
         
     # Used to turn grating about Y-axis relative to current orientation
-    def turnY(direction, theta):
+    def turnY(self, direction, theta):
         # Using the direction and the desired angle of rotation, create proper
         # ascii command to send to controller
         # Send usb serial command to rotational motor in Y-axis
-     
+        if (direction == 0):
+            distance = -distance
+        motorCommand = '2>2PR' + str(distance)
+        self.command(motorCommand)
+
         
     # Used to turn grating about Z-axis relative to current orientation
-    def turnZ(direction, theta):
+    def turnZ(self, direction, theta):
         # Using the direction and the desired angle of rotation, create proper
         # ascii command to send to controller
         # Send usb serial command to rotational motor in Z-axis
+        if (direction == 0):
+            distance = -distance
+        motorCommand = '2>3PR' + str(distance)
+        self.command(motorCommand)
       
     # Used to autoalign gratings based on picture of the fiducial image
-    def autoAllign():
+    def autoAllign(self):
         print(0)
     
 controller = MotorController()
