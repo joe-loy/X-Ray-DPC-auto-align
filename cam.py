@@ -1,5 +1,4 @@
-import os
-from ctypes import*
+import thorlabs_tsi_sdk
 from thorlabs_tsi_sdk.tl_camera import TLCameraSDK, TLCamera, Frame
 from thorlabs_tsi_sdk.tl_camera_enums import SENSOR_TYPE
 from thorlabs_tsi_sdk.tl_mono_to_color_processor import MonoToColorProcessorSDK
@@ -21,8 +20,8 @@ class Camera():
         camList = self.camSesh.discover_available_cameras()
         camSerialNum = '08153'
         self.cam = self.camSesh.open_camera(camSerialNum)
-        self.cam.operation_mode = SOFTWARE_TRIGGERED
-        
+        self.cam.operation_mode = thorlabs_tsi_sdk.tl_camera_enums.OPERATION_MODE.SOFTWARE_TRIGGERED
+        print('operation mode is ' + str(self.cam.operation_mode))
 
     # Call destructors for SDK and Camera objects 
     def closeCamera(self):
@@ -32,12 +31,13 @@ class Camera():
         
     # Takes a picture and returns an np.array of the image
     def takePicture(self):
-        frames_per_trigger = 1
-        self.cam.arm(frames_per_trigger)
+        self.cam.frames_per_trigger_zero_for_unlimited = 1
+        self.cam.arm(1)
+        print('is armed' + str(self.cam.is_armed))
         self.cam.issue_software_trigger()
         temp = self.cam.get_pending_frame_or_null()
-        print(temp.image_buffer)
         image = np.copy(temp.image_buffer)
+        self.cam.disarm()
         return image
 
 cam = Camera()
