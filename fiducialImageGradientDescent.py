@@ -41,21 +41,31 @@ ax2.imshow(sinogram, cmap=plt.cm.Greys_r,
 fig.tight_layout()
 plt.show()
 
-# Plot radon transform of Intensity vs projection angle and return sinogram
-def plot_radon_angle():
-    print(0)
+class imageGradientDescent():
+    # Image dimensions of image to be radon transformed
+    X_PIXELS = 100
+    Y_PIXELS = 100
+    X_MIDPOINT = X_PIXELS / 2
+    Y _MIDPOINT = Y_PIXELS / 2
+    
+    
+    def __init__(self):
 
-# Plot radon transform of Intensity vs x-pixels and return sinogram
-def plot_radon_x_pixels():
-    print(0)
+    # Plot radon transform of Intensity vs projection angle and return sinogram
+    def plot_radon_angle(self, image):
+        print(0)
 
-# Plot radon transform of Intensity vs y-pixels and return sinogram
-def plot_radon_y_pixels():
-    print(0)
+    # Plot radon transform of Intensity vs x-pixels and return sinogram
+    def plot_radon_x_pixels(self, image):
+        print(0)
 
-# Evaluate cost function based on the three sinograms to be generated from image
-def cost_function():
-    print(0)
+    # Plot radon transform of Intensity vs y-pixels and return sinogram
+    def plot_radon_y_pixels(self, image):
+        print(0)
+
+    # Evaluate cost function based on the three sinograms to be generated from image
+    def cost_function(self):
+        print(0)
 
 
 
