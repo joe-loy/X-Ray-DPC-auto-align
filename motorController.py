@@ -2,7 +2,7 @@ import usb.core
 import usb.util
 import re
 
-NEWFOCUS_COMMAND_REGEX = re.compile("([0-9]{0,1})([a-zA-Z?]{2,})([0-9+-]*)")
+NEWFOCUS_COMMAND_REGEX = re.compile('')
 MOTOR_TYPE = {
         "0":"No motor connected",
         "1":"Motor Unknown",
@@ -63,8 +63,9 @@ class MotorController():
         # Serial command SC2 scans RS-485 network of master controller and assigns
         # an address to controller 2
         scanNetwork = self.command('SC2')
+        self.command('SC')
 
-        """
+
         # Test to confirm that both master and slave controllers are connected
         # Confirm connection to user
         resp = self.command('VE?')
@@ -76,7 +77,7 @@ class MotorController():
         # Translational Motors will be connected to master controller
         # Rotational Motors will be connected to slave controller
         # Slave controller commands must be prefixed with "2>"
-        
+        """
         for m in range(1,numTranMotors):
             resp = self.command("{}QM?".format(m))
             print("Motor #{motor_number}: {status}".format(
@@ -90,7 +91,7 @@ class MotorController():
                                                     status=MOTOR_TYPE[resp[-1]]
                                                     ))
 
-""      """
+"""
         
 
         
@@ -122,37 +123,9 @@ class MotorController():
                 following (nn) parameters.
                 cite [2 - 6.1.2]
         """
-        m = NEWFOCUS_COMMAND_REGEX.match(newfocus_command)
-
-        # Check to see if a regex match was found in the user submitted command
-        if m:
-
-            # Extract matched components of the command
-            driver_number, command, parameter = m.groups()
-
-
-            usb_command = command
-
-            # Construct USB safe command
-            if driver_number:
-                usb_command = '1>{driver_number} {command}'.format(
-                                                    driver_number=driver_number,
-                                                    command=usb_command
-                                                    )
-            if parameter:
-                usb_command = '{command} {parameter}'.format(
-                                                    command=usb_command,
-                                                    parameter=parameter
-                                                    )
-
-            usb_command += '\r'
-
-            return usb_command
-        else:
-            print("ERROR! Command {} was not a valid format".format(
-                                                            newfocus_command
-                                                            ))
-
+        newfocus_command += '\r'
+        return newfocus_command
+        
 
     def parse_reply(self, reply):
         """Take controller's reply and make human readable

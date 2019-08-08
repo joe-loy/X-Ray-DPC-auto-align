@@ -23,67 +23,78 @@ class motorGUI:
 
         # Make translational x-axis control component
         self.xLabel_t = Label(master, text="Translational X-axis")
-        xDist = DoubleVar()
-        self.x_dist = Entry(master, textvariable=xDist, width=10)
-        xSlide = IntVar()
-        self.x_slide1 = Radiobutton(master, text="Left", variable = xSlide, value = 0)
-        self.x_slide2 = Radiobutton(master, text="Right", variable = xSlide, value = 1)
+        self.xDist = IntVar()
+        self.x_dist = Entry(master, textvariable=self.xDist, width=10)
+        self.xSlide = IntVar(value=0)
+        self.x_slide1 = Radiobutton(master, text="Left", variable=self.xSlide, value=0)
+        self.x_slide2 = Radiobutton(master, text="Right", variable=self.xSlide, value=1)
         # Test command for button that should allow motors to move according to user input in translational x-axis
         # TO DO: Using direction and distance from entry field, command motors to move
         def xMove():
-            print("xMove selected")
+            distance = self.x_dist.get()
+            direc = self.xSlide.get()
+            print("zTurn selected, distance = " + str(distance) + " , direction = " + str(direc))
         self.x_button_t = Button(master, command=xMove, text="Move motors")
 
         # Make translational z-axis control component
         self.zLabel_t = Label(master, text="Translational Z-axis")
-        zDist = DoubleVar()
-        self.z_dist = Entry(master, textvariable=zDist, width=10)
-        zSlide = IntVar()
-        self.z_slide1 = Radiobutton(master, text="Left", variable = zSlide, value = 0)
-        self.z_slide2 = Radiobutton(master, text="Right", variable = zSlide, value = 1)
+        self.zDist = IntVar()
+        self.z_dist = Entry(master, textvariable=self.zDist, width=10)
+        self.zSlide = IntVar(value=0)
+        self.z_slide1 = Radiobutton(master, text="Left", variable = self.zSlide, value = 0)
+        self.z_slide2 = Radiobutton(master, text="Right", variable = self.zSlide, value = 1)
         # Test command for button that should allow motors to move according to user input in translational z-axis
         # TO DO: Using direction and distance from entry field, command motors to move
         def zMove():
-            print("zMove selected")
+            distance = self.z_dist.get()
+            direc = self.zSlide.get()
+            print("zMove selected, distance = " + str(distance) + " , direction = " + str(direc))
         self.z_button_t = Button(master, command=zMove, text="Move motors")
 
         # Make rotational x-axis control component
         self.xLabel_r = Label(master, text="Rotational X-axis")
-        xTheta = DoubleVar()
-        self.x_theta = Entry(master, textvariable=xTheta, width=10)
-        x_turn = IntVar()
-        self.x_turn1 = Radiobutton(master, text="Left", variable = x_turn, value = 0)
-        self.x_turn2 = Radiobutton(master, text="Right", variable = x_turn, value = 1)
+        self.xTheta = IntVar()
+        self.x_theta = Entry(master, textvariable=self.xTheta, width=10)
+        self.x_turn = IntVar(value=0)
+        self.x_turn1 = Radiobutton(master, text="Left", variable = self.x_turn, value = 0)
+        self.x_turn2 = Radiobutton(master, text="Right", variable = self.x_turn, value = 1)
         # Test command for button that should allow motors to move according to user input in rotational x-axis
         # TO DO: Using direction and distance from entry field, command motors to move
         def xTurn():
-            print("xTurn selected")
+            distance = self.x_theta.get()
+            direc = self.xTheta.get()
+            print("xTurn selected, distance = " + str(distance) + " , direction = " + str(direc))
+
         self.x_button_r = Button(master, command=xTurn, text="Move motors")
 
         # Make rotational y-axis control component
         self.yLabel_r = Label(master, text="Rotational Y-axis")
-        yTheta = DoubleVar()
-        self.y_theta = Entry(master, textvariable=yTheta, width=10)
-        y_turn = IntVar()
-        self.y_turn1 = Radiobutton(master, text="Left", variable = y_turn, value = 0)
-        self.y_turn2 = Radiobutton(master, text="Right", variable = y_turn, value = 1)
+        self.yTheta = IntVar()
+        self.y_theta = Entry(master, textvariable=self.yTheta, width=10)
+        self.y_turn = IntVar(value=0)
+        self.y_turn1 = Radiobutton(master, text="Left", variable = self.y_turn, value = 0)
+        self.y_turn2 = Radiobutton(master, text="Right", variable = self.y_turn, value = 1)
         # Test command for button that should allow motors to move according to user input in rotational y-axis
         # TO DO: Using direction and distance from entry field, command motors to move
         def yTurn():
-            print("yTurn selected")
+            distance = self.y_theta.get()
+            direc = self.yTheta.get()
+            print("yTurn selected, distance = " + str(distance) + " , direction = " + str(direc))
         self.y_button_r = Button(master, command=yTurn, text="Move motors")
 
         # Make rotational z-axis control component
         self.zLabel_r = Label(master, text="Rotational Z-axis")
-        zTheta = DoubleVar()
-        self.z_theta = Entry(master, textvariable=zTheta, width=10)
-        z_turn = IntVar()
-        self.z_turn1 = Radiobutton(master, text="Left", variable = z_turn, value = 0)
-        self.z_turn2 = Radiobutton(master, text="Right", variable = z_turn, value = 1)
+        self.zTheta = IntVar()
+        self.z_theta = Entry(master, textvariable=self.zTheta, width=10)
+        self.z_turn = IntVar(value=0)
+        self.z_turn1 = Radiobutton(master, text="Left", variable = self.z_turn, value = 0)
+        self.z_turn2 = Radiobutton(master, text="Right", variable = self.z_turn, value = 1)
         # Test command for button that should allow motors to move according to user input in rotational z-axis
         # TO DO: Using direction and distance from entry field, command motors to move
         def zTurn():
-            print("zTurn selected")
+            distance = self.z_theta.get()
+            direc = self.zTheta.get()
+            print("zTurn selected, distance = " + str(distance) + " , direction = " + str(direc))
         self.z_button_r = Button(master, command=zTurn, text="Move motors")
 
         # Create picture and auto-align buttons
@@ -137,6 +148,7 @@ class motorGUI:
         # Organize take picture and auto-align buttons
         self.takePic.grid(column=0, row=40)
         self.autoAlign.grid(column=20, row = 40)
+
     
 root = Tk()
 my_gui = motorGUI(root)
