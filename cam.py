@@ -41,9 +41,7 @@ class Camera():
         self.cam.disarm()
         return image
 
-cam = Camera()
-image = cam.takePicture()
-print(image)
+
         
 
 
