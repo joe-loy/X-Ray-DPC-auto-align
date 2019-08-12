@@ -3,6 +3,9 @@ from PIL import*
 from PIL import Image
 from PIL import ImageTk
 from cam import Camera
+import matplotlib.pylab as plt
+import numpy as np
+import cv2
 #from motorController import MotorController
 """
 class: motorGUI
@@ -42,6 +45,7 @@ class motorGUI:
         self.xSlide = IntVar(value=0)
         self.x_slide1 = Radiobutton(master, text="Left", variable=self.xSlide, value=0)
         self.x_slide2 = Radiobutton(master, text="Right", variable=self.xSlide, value=1)
+
         # Test command for button that should allow motors to move according to user input in translational x-axis
         # TO DO: Using direction and distance from entry field, command motors to move
         def xMove():
@@ -50,6 +54,7 @@ class motorGUI:
             print("zTurn selected, distance = " + str(distance) + " , direction = " + str(direc))
         self.x_button_t = Button(master, command=xMove, text="Move motors")
 
+
         # Make translational z-axis control component
         self.zLabel_t = Label(master, text="Translational Z-axis")
         self.zDist = IntVar()
@@ -57,6 +62,7 @@ class motorGUI:
         self.zSlide = IntVar(value=0)
         self.z_slide1 = Radiobutton(master, text="Left", variable = self.zSlide, value = 0)
         self.z_slide2 = Radiobutton(master, text="Right", variable = self.zSlide, value = 1)
+
         # Test command for button that should allow motors to move according to user input in translational z-axis
         # TO DO: Using direction and distance from entry field, command motors to move
         def zMove():
@@ -81,6 +87,8 @@ class motorGUI:
 
         self.x_button_r = Button(master, command=xTurn, text="Move motors")
 
+
+
         # Make rotational y-axis control component
         self.yLabel_r = Label(master, text="Rotational Y-axis")
         self.yTheta = IntVar()
@@ -95,6 +103,8 @@ class motorGUI:
             direc = self.y_turn.get()
             print("yTurn selected, distance = " + str(distance) + " , direction = " + str(direc))
         self.y_button_r = Button(master, command=yTurn, text="Move motors")
+
+
 
         # Make rotational z-axis control component
         self.zLabel_r = Label(master, text="Rotational Z-axis")
@@ -111,14 +121,23 @@ class motorGUI:
             print("zTurn selected, distance = " + str(distance) + " , direction = " + str(direc))
         self.z_button_r = Button(master, command=zTurn, text="Move motors")
 
+
+
+
         # Create picture and auto-align buttons
         def snapPic():
             self.img = Image.fromarray(self.cam.takePicture(), 'L')
-            self.img = self.img.resize((3840//10, 2748//10)) 
+            self.img.show()
+            width, height = self.img.size
+            print(width,height)
+            self.img = self.img.resize((width//10, height//10)) 
             self.dispImg = ImageTk.PhotoImage(self.img)
             self.panel.configure(image=self.dispImg)
             print("Snap pic")
         self.takePic = Button(master, command=snapPic, text="Take Picture")
+
+
+
 
         def align():
             print("auto-align")

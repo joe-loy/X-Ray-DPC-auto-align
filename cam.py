@@ -22,6 +22,9 @@ class Camera():
         camSerialNum = '08153'
         self.cam = self.camSesh.open_camera(camSerialNum)
         self.cam.operation_mode = thorlabs_tsi_sdk.tl_camera_enums.OPERATION_MODE.SOFTWARE_TRIGGERED
+        # Set camera exposure in units of microseconds
+        expose_time = 50
+        self.cam.exposure_time_us = expose_time
         print('operation mode is ' + str(self.cam.operation_mode))
 
     # Call destructors for SDK and Camera objects 
