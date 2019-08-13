@@ -8,7 +8,6 @@ from cam import Camera
 from PIL import*
 from PIL import Image
 from PIL import ImageTk
-import heapq
 #from .motorController.py import motorController
 
 """
@@ -97,7 +96,6 @@ class imageGradientDescent():
         width = int(img.shape[1] * scale_percent / 100)
         height = int(img.shape[0] * scale_percent / 100)
         dim = (width, height)
-        print(dim)
         resized = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
 
         # Radon transform resized image
@@ -121,9 +119,6 @@ class imageGradientDescent():
         ax2.plot(thetas, absmax_sinogram, '-')
         fig.tight_layout()
         plt.show()
-        print(absmax_loc)
-
-        
 
     # Plot radon transform of Intensity vs x-pixels and return sinogram
     def plot_radon_pixels_x(self, image):
@@ -149,12 +144,6 @@ class imageGradientDescent():
         absmax_sinogram = np.amax(sinogram, axis=1)
         peaks, properties = sp.signal.find_peaks(absmax_sinogram, prominence=100)
 
-        print(properties["prominences"].max())
-        print(absmax_sinogram.max())
-        print(absmax_sinogram.argmax())
-        print(heapq.nlargest(3, absmax_sinogram))
-        print(sp.signal.find_peaks(absmax_sinogram, prominence=100))
-
         # Plot original image and absMax of Intensity of radon transform vs projection angle
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4.5))
         ax1.set_title("Original")
@@ -165,7 +154,6 @@ class imageGradientDescent():
         ax2.plot(peaks, absmax_sinogram[peaks], 'x')
         fig.tight_layout()
         plt.show()
-        print(0)
 
     # Plot radon transform of Intensity vs projection angle and return sinogram
     def plot_radon_angle_y(self, image):
@@ -177,7 +165,6 @@ class imageGradientDescent():
         width = int(img.shape[1] * scale_percent / 100)
         height = int(img.shape[0] * scale_percent / 100)
         dim = (width, height)
-        print(dim)
         resized = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
 
         # Radon transform resized image
@@ -201,7 +188,6 @@ class imageGradientDescent():
         ax2.plot(thetas, absmax_sinogram, '-')
         fig.tight_layout()
         plt.show()
-        print(absmax_loc)
 
 
     # Plot radon transform of Intensity vs y-pixels and return sinogram
@@ -214,8 +200,8 @@ class imageGradientDescent():
         width = int(img.shape[1] * scale_percent / 100)
         height = int(img.shape[0] * scale_percent / 100)
         dim = (width, height)
-        print(dim)
         resized = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
+        
         # Radon transform resized image
         nSteps = height
         thetaStart = 80
@@ -224,8 +210,6 @@ class imageGradientDescent():
         sinogram = radon(resized, theta=thetas, circle=True)
         absmax_sinogram = np.amax(sinogram, axis=1)
         peaks, properties = sp.signal.find_peaks(absmax_sinogram, prominence=100)
-        print(properties["prominences"].max())
-        print(sp.signal.find_peaks(absmax_sinogram, prominence=100))
 
         # Plot original image and absMax of Intensity of radon transform vs projection angle
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4.5))
@@ -237,7 +221,6 @@ class imageGradientDescent():
         ax2.plot(peaks, absmax_sinogram[peaks], 'x')
         fig.tight_layout()
         plt.show()
-        print(0)
 
     
 
@@ -251,7 +234,6 @@ class imageGradientDescent():
         width = int(img.shape[1] * scale_percent / 100)
         height = int(img.shape[0] * scale_percent / 100)
         dim = (width, height)
-        print(dim)
         resized = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
 
         # Radon transform resized image
@@ -306,7 +288,6 @@ class imageGradientDescent():
         width = int(img.shape[1] * scale_percent / 100)
         height = int(img.shape[0] * scale_percent / 100)
         dim = (width, height)
-        print(dim)
         resized = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
 
         # Radon transform resized image
@@ -332,7 +313,6 @@ class imageGradientDescent():
         width = int(img.shape[1] * scale_percent / 100)
         height = int(img.shape[0] * scale_percent / 100)
         dim = (width, height)
-        print(dim)
         resized = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
 
         # Radon transform resized image

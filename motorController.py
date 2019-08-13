@@ -1,8 +1,7 @@
 import usb.core
 import usb.util
-import re
 
-NEWFOCUS_COMMAND_REGEX = re.compile('')
+
 MOTOR_TYPE = {
         "0":"No motor connected",
         "1":"Motor Unknown",
@@ -17,6 +16,7 @@ This class is used to control a rig containing five picomotors which can be used
 degrees of freedom of movement for the gratings. This class uses the axis convention usually applied in optics
 of making the z axis the direction in which the x-rays pass through the gratings. Thus, the X axis controls
 side to side movement of the grating.
+
 """
 
 
@@ -91,12 +91,11 @@ class MotorController():
                                                     status=MOTOR_TYPE[resp[-1]]
                                                     ))
 
-"""
+        """
         
 
         
-        
-        
+         
     def send_command(self, usb_command, get_reply=False):
         """Send command to USB device endpoint
         
@@ -112,7 +111,7 @@ class MotorController():
         if get_reply:
             return self.ep_in.read(100)
             
-
+    # Used to convert a NewFocus command into a USB command
     def parse_command(self, newfocus_command):
         """Convert a NewFocus style command into a USB command
         Args:
@@ -123,10 +122,11 @@ class MotorController():
                 following (nn) parameters.
                 cite [2 - 6.1.2]
         """
+        # Add a carriage return at the end to make the command valid
         newfocus_command += '\r'
         return newfocus_command
         
-
+    # Used to return the reply of the motor from the serial command
     def parse_reply(self, reply):
         """Take controller's reply and make human readable
         Args:
@@ -139,7 +139,7 @@ class MotorController():
         reply = ''.join([chr(x) for x in reply])
         return reply.rstrip()
 
-
+    # Sends a NewFocus command to a motor as a usb command 
     def command(self, newfocus_command):
         """Send NewFocus formated command
         Args:
@@ -188,7 +188,7 @@ class MotorController():
 
         
     # Used to turn grating about X-axis relative to current orientation
-    def turnX(self, direction, theta):
+    def turnX(self, direction, distance):
         # Using the direction and the desired angle of rotation, create proper
         # ascii command to send to controller
         # Send usb serial command to rotational motor in X-axis
@@ -200,7 +200,7 @@ class MotorController():
 
         
     # Used to turn grating about Y-axis relative to current orientation
-    def turnY(self, direction, theta):
+    def turnY(self, direction, distance):
         # Using the direction and the desired angle of rotation, create proper
         # ascii command to send to controller
         # Send usb serial command to rotational motor in Y-axis
@@ -211,7 +211,7 @@ class MotorController():
 
         
     # Used to turn grating about Z-axis relative to current orientation
-    def turnZ(self, direction, theta):
+    def turnZ(self, direction, distance):
         # Using the direction and the desired angle of rotation, create proper
         # ascii command to send to controller
         # Send usb serial command to rotational motor in Z-axis
