@@ -16,7 +16,6 @@ This class is used to control a rig containing five picomotors which can be used
 degrees of freedom of movement for the gratings. This class uses the axis convention usually applied in optics
 of making the z axis the direction in which the x-rays pass through the gratings. Thus, the X axis controls
 side to side movement of the grating.
-
 """
 
 
@@ -90,7 +89,6 @@ class MotorController():
                                                     motor_number=m,
                                                     status=MOTOR_TYPE[resp[-1]]
                                                     ))
-
         """
         
 
@@ -223,6 +221,4 @@ class MotorController():
     # Used to autoalign gratings based on picture of the fiducial image
     def autoAllign(self):
         print(0)
-    
-controller = MotorController()
     

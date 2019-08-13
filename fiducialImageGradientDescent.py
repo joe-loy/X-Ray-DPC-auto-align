@@ -8,29 +8,26 @@ from cam import Camera
 from PIL import*
 from PIL import Image
 from PIL import ImageTk
-#from .motorController.py import motorController
+from motorController import MotorController
+import collections
 
 """
-
 fiducialImageGradientDescent.py
-
 This script is used to implement the functions necessary to perform the
 gradient descent which will be used by the motor controller in order to
 automatically align gratings. The gradient descent will be based on
 two seperate images of radon transforms of the fiducial images, which will
 be used as components of a cost function that will be used to implement
 the gradient descent.
-
 """
 
 
 
-"""
+
 # Open image
-img = cv2.imread('z500_r7_0_d8_aligned.tiff', 0)
-
+img = cv2.imread('z500_r7,0_d8_aligned.tiff', 0)
 # resize image
-scale_percent = 20 # percent of original size
+scale_percent = 10 # percent of original size
 width = int(img.shape[1] * scale_percent / 100)
 height = int(img.shape[0] * scale_percent / 100)
 dim = (width, height)
@@ -42,10 +39,9 @@ thetaEnd = 100
 thetas = np.linspace(thetaStart, thetaEnd, nSteps)
 sinogram = radon(resized, theta=thetas, circle=True)
 absmax_sinogram = np.amax(sinogram, axis=1)
-peaks, properties = sp.signal.find_peaks(absmax_sinogram, prominence=100)
+peaks, properties = sp.signal.find_peaks(absmax_sinogram, prominence=50)
 print(properties["prominences"].max())
 print(sp.signal.find_peaks(absmax_sinogram, prominence=100))
-
 # Plot original image and absMax of Intensity of radon transform vs projection angle
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4.5))
 ax1.set_title("Original")
@@ -62,37 +58,35 @@ print(vals[1][0])
 fig.tight_layout()
 plt.show()
 print(0)
-"""
+
 
 
 class imageGradientDescent():
     # Constants that will be necessary for evaluation of cost function
-    X_PIXELS = 549
-    Y_PIXELS = 768
+    X_PIXELS = 4096 // 10
+    Y_PIXELS = 2160 // 10
     X_MIDPOINT = X_PIXELS / 2
     Y_MIDPOINT = Y_PIXELS / 2
-    X_QPOINT = X_MIDPOINT / 2
-    Y_QPOINT = Y_MIDPOINT / 2
     IDEAL_Z_DISP = 0
-    EPSILON = .05
-    MAX_STEPS = 1000000000000000
+    EPSILON = 100
+    MAX_STEPS = 100000
     
     
     
     def __init__(self):
         # Initalize the camera and motorController for use in the gradient descent
-        #self.cam = Camera()
-        #self.controller = MotorController()
+        self.cam = Camera()
+        self.controller = MotorController()
         
         print(0)
 
     # Plot radon transform of Intensity vs projection angle and return sinogram
     def plot_radon_angle_x(self, image):
         # Open image
-        img = cv2.imread('z500_r7_0_d8_aligned.tiff', 0)
+        img = cv2.imread('z500_r7,0_d8_aligned.tiff', 0)
 
         # resize image
-        scale_percent = 20 # percent of original size
+        scale_percent = 10 # percent of original size
         width = int(img.shape[1] * scale_percent / 100)
         height = int(img.shape[0] * scale_percent / 100)
         dim = (width, height)
@@ -123,10 +117,10 @@ class imageGradientDescent():
     # Plot radon transform of Intensity vs x-pixels and return sinogram
     def plot_radon_pixels_x(self, image):
         # Open image
-        img = cv2.imread('z500_r7_0_d8_aligned.tiff', 0)
+        img = cv2.imread('z500_r7,0_d8_aligned.tiff', 0)
 
         # resize image
-        scale_percent = 20 # percent of original size
+        scale_percent = 10 # percent of original size
         width = int(img.shape[1] * scale_percent / 100)
         height = int(img.shape[0] * scale_percent / 100)
         dim = (width, height)
@@ -158,10 +152,10 @@ class imageGradientDescent():
     # Plot radon transform of Intensity vs projection angle and return sinogram
     def plot_radon_angle_y(self, image):
         # Open image
-        img = cv2.imread('z500_r7_0_d8_aligned.tiff', 0)
+        img = cv2.imread('z500_r7,0_d8_aligned.tiff', 0)
 
         # resize image
-        scale_percent = 20 # percent of original size
+        scale_percent = 10 # percent of original size
         width = int(img.shape[1] * scale_percent / 100)
         height = int(img.shape[0] * scale_percent / 100)
         dim = (width, height)
@@ -193,10 +187,10 @@ class imageGradientDescent():
     # Plot radon transform of Intensity vs y-pixels and return sinogram
     def plot_radon_y_pixels(self, image):
         # Open image
-        img = cv2.imread('z500_r7_0_d8_aligned.tiff', 0)
+        img = cv2.imread('z500_r7,0_d8_aligned.tiff', 0)
 
         # resize image
-        scale_percent = 20 # percent of original size
+        scale_percent = 10 # percent of original size
         width = int(img.shape[1] * scale_percent / 100)
         height = int(img.shape[0] * scale_percent / 100)
         dim = (width, height)
@@ -227,10 +221,10 @@ class imageGradientDescent():
     # Returns location of absolute max of Intensity vs Projection angle radon transform
     def getRadonTransform1Params(self):
         # Open image
-        img = cv2.imread('z500_r7_0_d8_aligned.tiff', 0)
+        img = cv2.imread('z500_r7,0_d8_aligned.tiff', 0)
 
         # resize image
-        scale_percent = 20 # percent of original size
+        scale_percent = 10 # percent of original size
         width = int(img.shape[1] * scale_percent / 100)
         height = int(img.shape[0] * scale_percent / 100)
         dim = (width, height)
@@ -255,10 +249,10 @@ class imageGradientDescent():
     # Returns [rmax1_mag_x, rmax1_loc_x, amax_mag_x, amax_loc_x, rmax2_mag_x, rmax2_loc_x]
     def getRadonTransform2Params(self):
         # Open image
-        img = cv2.imread('z500_r7_0_d8_aligned.tiff', 0)
+        img = cv2.imread('z500_r7,0_d8_aligned.tiff', 0)
 
         # resize image
-        scale_percent = 20 # percent of original size
+        scale_percent = 10 # percent of original size
         width = int(img.shape[1] * scale_percent / 100)
         height = int(img.shape[0] * scale_percent / 100)
         dim = (width, height)
@@ -281,10 +275,10 @@ class imageGradientDescent():
     # Returns [rmax1_mag_y, rmax1_loc_y, amax_mag_y, amax_loc_y, rmax2_mag_y, rmax2_loc_y]
     def getRadonTransform3Params(self):
         # Open image
-        img = cv2.imread('z500_r7_0_d8_aligned.tiff', 0)
+        img = cv2.imread('z500_r7,0_d8_aligned.tiff', 0)
 
         # resize image
-        scale_percent = 20 # percent of original size
+        scale_percent = 10 # percent of original size
         width = int(img.shape[1] * scale_percent / 100)
         height = int(img.shape[0] * scale_percent / 100)
         dim = (width, height)
@@ -306,10 +300,10 @@ class imageGradientDescent():
     # Ye boi
     def getRadonTransform4Params(self):
         # Open image
-        img = cv2.imread('z500_r7_0_d8_aligned.tiff', 0)
+        img = cv2.imread('z500_r7,0_d8_aligned.tiff', 0)
 
         # resize image
-        scale_percent = 20 # percent of original size
+        scale_percent = 10 # percent of original size
         width = int(img.shape[1] * scale_percent / 100)
         height = int(img.shape[0] * scale_percent / 100)
         dim = (width, height)
@@ -338,7 +332,8 @@ class imageGradientDescent():
         print(xparams)
         print(yparams)
         
-        zdisp = 0 - self.getRadonTransform1Params()
+        zdisp_x = 0 - self.getRadonTransform1Params()
+        zdisp_y = 0 - self.getRadonTransform3Params()
         rmax1_loc_x = xparams[0][0]
         rmax1_mag_x = xparams[1][0]
         rmax2_loc_x = xparams[0][2]
@@ -353,20 +348,24 @@ class imageGradientDescent():
         amax_mag_y = yparams[1][1]
         
 
-        
-        s1 = np.sqrt(np.square(self.IDEAL_Z_DISP - zdisp))
-        s2 = np.sqrt(np.square(self.X_MIDPOINT - amax_loc_x))
-        s3 = np.sqrt(np.square(self.Y_MIDPOINT - amax_loc_y))
-        s4 = np.sqrt(np.square(self.X_QPOINT - rmax1_loc_x))
-        s5 = np.sqrt(np.square(self.X_MIDPOINT + self.X_QPOINT - rmax2_loc_x))
-        s6 = np.sqrt(np.square(self.Y_QPOINT - rmax1_loc_y))
-        s7 = np.sqrt(np.square(self.Y_MIDPOINT + self.Y_QPOINT - rmax2_loc_y))
-        s8 = np.sqrt(np.square(rmax1_mag_x - rmax2_mag_x))
-        s9 = np.sqrt(np.square(rmax1_mag_y - rmax2_mag_y))
-        s10 = np.sqrt(np.square(amax_mag_x - rmax1_mag_x - rmax2_mag_x))
-        s11 = np.sqrt(np.square(amax_mag_y - rmax1_mag_y - rmax2_mag_y))
-        print(str(s1) + ',' + str(s2) + ',' + str(s3) + ',' + str(s4) + ',' + str(s5) + ',' + str(s6))
-        costFunction = s1 + s2 + s3 + s4 + s5 + s6 + s7 + s8 + s9 + s10 + s11
+        # Determine error in rotational z alignment
+        s1 = np.square(self.IDEAL_Z_DISP - zdisp_x)
+        # Determine error in rotational x alignment
+        s2 = np.square(self.X_MIDPOINT - amax_loc_x)
+        # Determine error in rotational y alignment
+        s3 = np.square(rmax1_mag_x - rmax2_mag_x)
+        # Determine error in translational / rotational x alignment
+        s4 = np.square((amax_loc_x - rmax1_loc_x) - (rmax2_loc_x - amax_loc_x))
+        # Determine error in rotational z aligment
+        s5 = np.square(self.IDEAL_Z_DISP - zdisp_y)
+        #
+        s6 = np.square(self.Y_MIDPOINT - amax_loc_y)
+        #
+        s7 = np.square(rmax1_mag_y - rmax2_mag_y)
+        #
+        s8 = np.square((amax_loc_y - rmax1_loc_y) - (rmax2_loc_y - amax_loc_y))
+        print(str(s1) + ',' + str(s2) + ',' + str(s3) + ',' + str(s4) + ',' + str(s5) + ',' + str(s6) + ',' + str(s7) + ',' + str(s8))
+        costFunction = np.sqrt(s1 + s2 + s3 + s4 + s5 + s6 + s7 + s8)
         
         return costFunction
 
@@ -392,8 +391,3 @@ class imageGradientDescent():
 
 leggo = imageGradientDescent()
 print(leggo.eval_cost_function())
-
-
-    
-
-
