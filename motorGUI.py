@@ -2,11 +2,10 @@ from tkinter import*
 from PIL import*
 from PIL import Image
 from PIL import ImageTk
-from cam import Camera
 import matplotlib.pylab as plt
 import numpy as np
 import cv2
-#from motorController import MotorController
+from fiducialImageGradientDescent import imageGradientDescent
 """
 class: motorGUI
 
@@ -27,9 +26,10 @@ class motorGUI:
         self.master = master
         master.title("Picomotor Controller Alignment GUI")
 
-        # Initalize camera and motor controller
-        self.cam = Camera()
-        # self.controller = MotorController()
+        # Initalize fiducial gradient descent class(which starts motors and camera)
+        self.alignmentSystem = imageGradientDescent()
+        self.cam = self.alignmentSystem.cam
+        self.controller = self.alignmentSystem.controller
 
         # Create all buttons and textboxes for GUI
         
@@ -52,6 +52,7 @@ class motorGUI:
         def xMove_t():
             distance = self.xEntry_dist_t.get()
             direc = self.xDir_t.get()
+            self.controller.moveX(direc, distance)
             print("xMove_t selected, distance = " + str(distance) + " , direction = " + str(direc))
         self.x_button_t = Button(master, command=xMove_t, text="Move motors")
 
@@ -67,6 +68,7 @@ class motorGUI:
         def zMove_t():
             distance = self.zEntry_dist_t.get()
             direc = self.zDir_t.get()
+            self.controller.moveZ(direc, distance)
             print("zMove_t selected, distance = " + str(distance) + " , direction = " + str(direc))
         self.z_button_t = Button(master, command=zMove_t, text="Move motors")
 
@@ -83,6 +85,7 @@ class motorGUI:
         def xMove_r():
             distance = self.xEntry_dist_r.get()
             direc = self.xDir_r.get()
+            self.controller.turnX(direc, distance)
             print("xMove_r selected, distance = " + str(distance) + " , direction = " + str(direc))
         self.x_button_r = Button(master, command=xMove_r, text="Move motors")
 
@@ -99,6 +102,7 @@ class motorGUI:
         def yMove_r():
             distance = self.yEntry_dist_r.get()
             direc = self.yDir_r.get()
+            self.controller.turnY(direc, distance)
             print("yMove_r selected, distance = " + str(distance) + " , direction = " + str(direc))
         self.y_button_r = Button(master, command=yMove_r, text="Move motors")
 
@@ -115,6 +119,7 @@ class motorGUI:
         def zMove_r():
             distance = self.zEntry_dist_r.get()
             direc = self.zDir_r.get()
+            self.controller.turnZ(direc, distance)
             print("zMove_r selected, distance = " + str(distance) + " , direction = " + str(direc))
         self.z_button_r = Button(master, command=zMove_r, text="Move motors")
 
@@ -124,19 +129,17 @@ class motorGUI:
         def snapPic():
             # Must cast array type as uint (thorcam uses ushorts to store values)
             self.img = Image.fromarray(self.cam.takePicture().astype('uint8'), 'L')
-            self.img.show()
             width, height = self.img.size
-            print(width,height)
             self.img = self.img.resize((width//10, height//10)) 
             self.dispImg = ImageTk.PhotoImage(self.img)
             self.panel.configure(image=self.dispImg)
-            print("Snap pic")
         self.takePic = Button(master, command=snapPic, text="Take Picture")
 
 
 
         def align():
-            print("auto-align")
+            self.alignmentSystem.gradientDescent()
+            print("auto align done")
         self.autoAlign = Button(master, command=align, text="Auto-Align")
 
 

@@ -3,7 +3,7 @@ from thorlabs_tsi_sdk.tl_camera import TLCameraSDK, TLCamera, Frame
 from thorlabs_tsi_sdk.tl_camera_enums import SENSOR_TYPE
 from thorlabs_tsi_sdk.tl_mono_to_color_processor import MonoToColorProcessorSDK
 import numpy as np
-#from PIL import Image
+from PIL import Image
 
 """
 Camera
@@ -25,10 +25,10 @@ class Camera():
         # Set camera exposure in units of microseconds
         expose_time = 36
         self.cam.exposure_time_us = expose_time
-        print('operation mode is ' + str(self.cam.operation_mode))
+        self.cam.frames_per_trigger_zero_for_unlimited = 1
 
     # Call destructors for SDK and Camera objects 
-    def closeCamera(self):
+    def __del__(self):
         self.cam.dispose()
         self.camSesh.dispose()
 
@@ -37,15 +37,33 @@ class Camera():
     def takePicture(self):
         self.cam.frames_per_trigger_zero_for_unlimited = 1
         self.cam.arm(1)
-        print('is armed' + str(self.cam.is_armed))
         self.cam.issue_software_trigger()
         temp = self.cam.get_pending_frame_or_null()
         image = np.copy(temp.image_buffer)
+        # Extract middle of x coordinates to get square photo (photos are 4096x2160)
+        image = image[:, 968:3128]
         self.cam.disarm()
         return image
 
+    # Initialize camera for video recording
+    def initVideo(self):
+        self.cam.frames_per_trigger_zero_for_unlimited = 0
+        self.cam.arm(1)
+        self.cam.issue_software_trigger()
 
-        
+    # Return video frames being taken by camera
+    def getVideo(self):
+        temp = self.cam.get_pending_frame_or_null()
+        image = np.copy(temp.image_buffer)
+        return image
+
+    # End a video feed for a camera
+    def endVideo(self):
+        self.cam.frames_per_trigger_zero_for_unlimited = 1
+        self.cam.disarm()
+
+
+   
 
 
 

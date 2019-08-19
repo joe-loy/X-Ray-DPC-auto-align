@@ -16,6 +16,7 @@ This class is used to control a rig containing five picomotors which can be used
 degrees of freedom of movement for the gratings. This class uses the axis convention usually applied in optics
 of making the z axis the direction in which the x-rays pass through the gratings. Thus, the X axis controls
 side to side movement of the grating.
+
 """
 
 
@@ -89,6 +90,7 @@ class MotorController():
                                                     motor_number=m,
                                                     status=MOTOR_TYPE[resp[-1]]
                                                     ))
+
         """
         
 
@@ -108,7 +110,12 @@ class MotorController():
         self.ep_out.write(usb_command)
         if get_reply:
             return self.ep_in.read(100)
-            
+
+    # Close serial connection with the MotorController when finished
+    def __del__():
+        print(0)
+
+           
     # Used to convert a NewFocus command into a USB command
     def parse_command(self, newfocus_command):
         """Convert a NewFocus style command into a USB command
@@ -161,15 +168,12 @@ class MotorController():
             return self.parse_reply(reply)
 
     
-    # Close serial connection with the MotorController when finished
-    def closeMotorController():
-        print(0)
         
         
     # Used to translationally move grating in X-axis relative to current position
     def moveX(self, direction, distance):
         if (direction == 0):
-            distance = -distance
+            distance = -(int(distance))
         motorCommand = '1PR' + str(distance)
         self.command(motorCommand)
             
@@ -179,7 +183,7 @@ class MotorController():
     # Used to translationally move grating in Z-axis relative to current position
     def moveZ(self, direction, distance):
         if (direction == 0):
-            distance = -distance
+            distance = -(int(distance))
         motorCommand = '2PR' + str(distance)
         self.command(motorCommand)
     
@@ -191,7 +195,7 @@ class MotorController():
         # ascii command to send to controller
         # Send usb serial command to rotational motor in X-axis
         if (direction == 0):
-            distance = -distance
+            distance = -(int(distance))
         motorCommand = '2>1PR' + str(distance)
         self.command(motorCommand)
         
@@ -203,7 +207,7 @@ class MotorController():
         # ascii command to send to controller
         # Send usb serial command to rotational motor in Y-axis
         if (direction == 0):
-            distance = -distance
+            distance = -(int(distance))
         motorCommand = '2>2PR' + str(distance)
         self.command(motorCommand)
 
@@ -214,11 +218,9 @@ class MotorController():
         # ascii command to send to controller
         # Send usb serial command to rotational motor in Z-axis
         if (direction == 0):
-            distance = -distance
+            distance = -(int(distance))
         motorCommand = '2>3PR' + str(distance)
         self.command(motorCommand)
       
-    # Used to autoalign gratings based on picture of the fiducial image
-    def autoAllign(self):
-        print(0)
     
+#controller = MotorController()
