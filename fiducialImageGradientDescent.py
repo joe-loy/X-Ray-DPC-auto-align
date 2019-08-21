@@ -28,7 +28,7 @@ class imageGradientDescent():
     X_MIDPOINT = X_PIXELS / 2
     Y_MIDPOINT = Y_PIXELS / 2
     IDEAL_Z_DISP = 0
-    EPSILON = 90
+    EPSILON = 95
     MAX_STEPS = 100000
     
     
@@ -304,7 +304,8 @@ class imageGradientDescent():
         amax_mag_x = xparams[1][1]
         amax_loc_y = yparams[0][1]
         amax_mag_y = yparams[1][1]
-        
+
+
 
         # Cost function components
         s1 = np.square(self.IDEAL_Z_DISP - zdisp_x)
@@ -319,6 +320,9 @@ class imageGradientDescent():
         #print(str(s1) + ',' + str(s2) + ',' + str(s3) + ',' + str(s4) + ',' + str(s5) + ',' + str(s6) + ',' + str(s7) + ',' + str(s8))
         costFunction = np.sqrt(s1 + s2 + s3 + s4 + s5 + s6 + s7 + s8)
         print(str(costFunction))
+        # If the number of peaks is greater than 3, return cost function times 1.5
+        if len(xparams) > 3:
+            return int(costFunction) * 2
         return int(costFunction)
 
     # Determines the stepSize based on value of cost function
@@ -341,10 +345,10 @@ class imageGradientDescent():
     def calc_scaleFactor(self, cf):
 
         if cf > 0 and cf < 100:
-            scaleFactor = 25
+            scaleFactor = 10
             return scaleFactor
         elif cf >= 100 and cf <= 200:
-            scaleFactor = 20
+            scaleFactor = 10
             return scaleFactor
         else:
             scaleFactor = 10

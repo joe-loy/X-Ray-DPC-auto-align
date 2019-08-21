@@ -4,6 +4,8 @@ from thorlabs_tsi_sdk.tl_camera_enums import SENSOR_TYPE
 from thorlabs_tsi_sdk.tl_mono_to_color_processor import MonoToColorProcessorSDK
 import numpy as np
 from PIL import Image
+import threading
+import time
 
 """
 Camera
@@ -26,6 +28,7 @@ class Camera():
         expose_time = 36
         self.cam.exposure_time_us = expose_time
         self.cam.frames_per_trigger_zero_for_unlimited = 1
+        self.isStreaming = False
 
     # Call destructors for SDK and Camera objects 
     def __del__(self):
@@ -45,20 +48,33 @@ class Camera():
         self.cam.disarm()
         return image
 
+
     # Initialize camera for video recording
-    def initVideo(self):
+    def startVideoStream(self):
+        if self.isStreaming:
+            print("Video is already streaming")
+            return None
+        self.isStreaming = True
         self.cam.frames_per_trigger_zero_for_unlimited = 0
         self.cam.arm(1)
         self.cam.issue_software_trigger()
-
-    # Return video frames being taken by camera
-    def getVideo(self):
+        self.vidThread = threading.Thread(target=self.getVideoStream)
+        self.vidThread.start()
+        return self
+        
+    
+    # Start 
+    def getVideoStream(self):
         temp = self.cam.get_pending_frame_or_null()
         image = np.copy(temp.image_buffer)
+        image = image[:, 968:3128]
         return image
 
+
     # End a video feed for a camera
-    def endVideo(self):
+    def endVideoStream(self):
+        self.isStreaming = False
+        self.vidThread.join()
         self.cam.frames_per_trigger_zero_for_unlimited = 1
         self.cam.disarm()
 

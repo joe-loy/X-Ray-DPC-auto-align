@@ -179,6 +179,11 @@ class MotorController():
             
 
 
+    def moveY(self, direction, distance):
+        if (direction == 0):
+            distance = -(int(distance))
+        motorCommand = '3PR' + str(distance)
+        self.command(motorCommand)
 
     # Used to translationally move grating in Z-axis relative to current position
     def moveZ(self, direction, distance):

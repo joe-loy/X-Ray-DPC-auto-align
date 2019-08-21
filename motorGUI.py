@@ -5,6 +5,8 @@ from PIL import ImageTk
 import matplotlib.pylab as plt
 import numpy as np
 import cv2
+import threading
+import time
 from fiducialImageGradientDescent import imageGradientDescent
 """
 class: motorGUI
@@ -38,8 +40,11 @@ class motorGUI:
         width, height = self.img.size        
         self.img = self.img.resize((width//10, height//10)) 
         self.dispImg = ImageTk.PhotoImage(self.img)
-        self.panel = Label(master, image=self.dispImg)
+        self.vidStream = ImageTk.PhotoImage(self.img)
+        self.photoPanel = Label(master, image=self.dispImg)
+        self.videoPanel = Label(master, image = self.vidStream)
 
+        
 
         # Make translational x-axis control component
         self.xLabel_t = Label(master, text="Translational X-axis")
@@ -55,6 +60,24 @@ class motorGUI:
             self.controller.moveX(direc, distance)
             print("xMove_t selected, distance = " + str(distance) + " , direction = " + str(direc))
         self.x_button_t = Button(master, command=xMove_t, text="Move motors")
+
+
+
+        # Make translational z-axis control component
+        self.yLabel_t = Label(master, text="Translational Y-axis")
+        self.yDist_t = IntVar()
+        self.yEntry_dist_t = Entry(master, textvariable=self.yDist_t, width=10)
+        self.yDir_t = IntVar(value=0)
+        self.yDir_t_neg = Radiobutton(master, text="Backward", variable = self.yDir_t, value = 0)
+        self.yDir_t_pos = Radiobutton(master, text="Forward", variable = self.yDir_t, value = 1)
+        # Command translational z motors to move based on GUI entries
+        def yMove_t():
+            distance = self.yEntry_dist_t.get()
+            direc = self.yDir_t.get()
+            self.controller.moveY(direc, distance)
+            print("yMove_t selected, distance = " + str(distance) + " , direction = " + str(direc))
+        self.y_button_t = Button(master, command=yMove_t, text="Move motors")
+
 
 
         # Make translational z-axis control component
@@ -132,15 +155,31 @@ class motorGUI:
             width, height = self.img.size
             self.img = self.img.resize((width//10, height//10)) 
             self.dispImg = ImageTk.PhotoImage(self.img)
-            self.panel.configure(image=self.dispImg)
+            self.photoPanel.configure(image=self.dispImg)
         self.takePic = Button(master, command=snapPic, text="Take Picture")
 
-
+        # Create video feed start and stop buttons
+        def initVideoStream():
+            self.cam.startVideoStream()
+            self.vidStream = ImageTk.PhotoImage(Image.open('z500_r7_0_d8_aligned.tiff'))
+            while self.cam.isStreaming:
+                frame = self.cam.getVideoStream().astype('uint8')
+                self.vidFrame = Image.fromarray(frame, 'L')
+                self.vidFrame = self.vidFrame.resize((width//10, height//10)) 
+                self.vidStream = ImageTk.PhotoImage(self.vidFrame)
+                self.photoPanel.configure(image=self.vidStream)
+        self.startVidButton = Button(master, command=initVideoStream, text="Start video capture")
+        self.endVidButton = Button(master, command=self.cam.endVideoStream, text="End video capture")
+        self.videoPanel = Label(master, image=self.vidStream)
 
         def align():
             self.alignmentSystem.gradientDescent()
             print("auto align done")
         self.autoAlign = Button(master, command=align, text="Auto-Align")
+
+        # Create video feed buttons and photoPanel
+
+        
 
 
 
@@ -153,12 +192,19 @@ class motorGUI:
         self.xDir_t_pos.grid(column=9, row=9003)
         self.x_button_t.grid(column=1, row=9004)
 
+        # Organize buttons controlling translational motion in y-axis
+        self.yLabel_t.grid(column=20, row=9001)
+        self.yEntry_dist_t.grid(column=20, row=9002)
+        self.yDir_t_neg.grid(column=20, row=9003)
+        self.yDir_t_pos.grid(column=28, row=9003)
+        self.y_button_t.grid(column=20, row=9004)
+
         # Organize buttons controlling translational motion in z-axis
-        self.zLabel_t.grid(column=20, row=9001)
-        self.zEntry_dist_t.grid(column=20, row=9002)
-        self.zDir_t_neg.grid(column=20, row=9003)
-        self.zDir_t_pos.grid(column=28, row=9003)
-        self.z_button_t.grid(column=20, row=9004)
+        self.zLabel_t.grid(column=40, row=9001)
+        self.zEntry_dist_t.grid(column=40, row=9002)
+        self.zDir_t_neg.grid(column=40, row=9003)
+        self.zDir_t_pos.grid(column=48, row=9003)
+        self.z_button_t.grid(column=40, row=9004)
 
         # Organize buttons controlling rotational motion in x-axis
         self.xLabel_r.grid(column=1, row=9020)
@@ -183,10 +229,13 @@ class motorGUI:
 
         # Organize take picture and auto-align buttons
         self.takePic.grid(column=1, row=9040)
-        self.autoAlign.grid(column=20, row = 9040)
+        self.autoAlign.grid(column=20, row=9040)
+        self.startVidButton.grid(column=40, row=9040)
+        self.endVidButton.grid(column=60, row=9040)
 
         # Organize photo canvas
-        self.panel.grid(column=100, row=0)
+        self.photoPanel.grid(column=100, row=0)
+        self.videoPanel.grid(column=200, row=0)
         
 
     
